@@ -1,44 +1,42 @@
 #!/usr/bin/python3
-""" script that reads stdin line by line and computes metrics """
+"""Python script that reads stdin line by line and computes metrics"""
 
 import sys
 
 
-def printsts(dic, size):
-    """ Prints information """
-    print("File size: {:d}".format(size))
-    for i in sorted(dic.keys()):
-        if dic[i] != 0:
-            print("{}: {:d}".format(i, dic[i]))
+def print_n(t_file_size, status):
+    """Prints total file size and status list"""
+    print("File size: {:d}".format(t_file_size))
+    for key, value in sorted(status.items()):
+        if value != 0:
+            print("{}: {}".format(key, value))
 
 
-sts = {"200": 0, "301": 0, "400": 0, "401": 0, "403": 0,
-       "404": 0, "405": 0, "500": 0}
+status = {'200': 0, '301': 0, '400': 0, '401': 0,
+          '403': 0, '404': 0, '405': 0, '500': 0}
 
+t_file_size = 0
 count = 0
-size = 0
-
 try:
     for line in sys.stdin:
-        if count != 0 and count % 10 == 0:
-            printsts(sts, size)
+        args = line.split()
 
-        stlist = line.split()
-        count += 1
+        if len(args) > 2:
+            status_code = args[-2]
+            file_size = int(args[-1])
 
-        try:
-            size += int(stlist[-1])
-        except:
-            pass
+            if status_code in status:
+                status[status_code] += 1
 
-        try:
-            if stlist[-2] in sts:
-                sts[stlist[-2]] += 1
-        except:
-            pass
-    printsts(sts, size)
+            t_file_size += file_size
+            count += 1
 
+            if count == 10:
+                print_n(t_file_size, status)
+                count = 0
 
 except KeyboardInterrupt:
-    printsts(sts, size)
-    raise
+    pass
+
+finally:
+    print_n(t_file_size, status)
